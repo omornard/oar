@@ -5127,6 +5127,27 @@ sub get_requested_resources($$$) {
 }
 
 
+# get_all_resources
+# gets all properties for all resources
+# parameters : base
+# return value : list of all resources
+sub get_all_resources($) {
+	my $dbh = shift;
+
+	my %resources_info;
+	my $sth = $dbh->prepare("SELECT * FROM resources ORDER BY network_address ASC, resource_id ASC");
+	$sth->execute();
+	my @res = ();
+	while(my $ref = $sth->fetchrow_hashref()) {
+		push(@res, $ref);
+		$resources_info{$ref->{'resource_id'}} = $ref;
+	}
+	$sth->finish();
+
+        return %resources_info;
+}
+
+
 # list_nodes
 # gets the list of all nodes.
 # parameters : base

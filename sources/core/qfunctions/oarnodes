@@ -50,7 +50,6 @@ my @resources;
 my @nodes;
 ### END Variables declaration ###
 
-
 ### Print Methods ###
 
 sub print_usage(){
@@ -164,12 +163,9 @@ sub print_all_hostnames(){
 sub print_hosts_infos($){
 	my $nodes = shift;
 	my $infos;
-	foreach my $current_node (@$nodes){
-		my $infos_for_host = OAR::Nodes::get_resources_infos_for_host($current_node);
-		while ( my ($id,$info) = each %$infos_for_host ){
-		    $infos->{$id} = $info; # modify here to add depth (sorted by network_address)
-		}
-	}
+
+	$infos = OAR::Nodes::get_all_resources_opti();
+
 	if (defined($DUMPER_mode) || defined($XML_mode) || defined($YAML_mode) || defined($JSON_mode)){
 	    format_result($infos);
 	}

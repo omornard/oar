@@ -67,6 +67,11 @@ sub get_all_resources(){
         return \@resources;
 }
 
+sub get_all_resources_opti(){
+    my %resources = OAR::IO::get_all_resources($base);
+    return \%resources;
+}
+
 sub count_all_resources() {
 	my $total = OAR::IO::count_all_resources($base);
 	return $total;
