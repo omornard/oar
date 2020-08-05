@@ -160,18 +160,48 @@ sub print_all_hostnames(){
 	}
 }
 
-sub print_hosts_infos($){
-	my $nodes = shift;
+sub print_all_hosts_infos(){
 	my $infos;
+	my $res;
 
 	$infos = OAR::Nodes::get_all_resources_opti();
 
+	$res = OAR::Nodes::get_all_resources_jobs();
+
+	foreach my $id (keys(%$res)) {
+
+		if ($infos->{$id}->{'state'} eq "Alive") {
+
+ 			my $jobs_string = '';
+			foreach my $current_job (@$res{$id}) {
+                               $jobs_string .= join(", ", @$current_job);
+			}
+			$infos->{$id}->{'jobs'} = $jobs_string;
+		}
+	}
 	if (defined($DUMPER_mode) || defined($XML_mode) || defined($YAML_mode) || defined($JSON_mode)){
 	    format_result($infos);
 	}
 	else{
 	    print_resources_flat_way($infos);
 	}
+}
+
+sub print_hosts_infos($){
+	my $nodes = shift;
+	my $infos;
+	foreach my $current_node (@$nodes){
+		my $infos_for_host = OAR::Nodes::get_resources_infos_for_host($current_node);
+		while ( my ($id,$info) = each %$infos_for_host ){
+			    $infos->{$id} = $info; # modify here to add depth (sorted by network_address)
+    		}
+	}
+	if (defined($DUMPER_mode) || defined($XML_mode) || defined($YAML_mode) || defined($JSON_mode)){
+	    format_result($infos);
+    	}
+	else{
+	    print_resources_flat_way($infos);
+    	}
 }
 
 sub print_resources_infos($){
@@ -246,7 +276,7 @@ OAR::Nodes::open_db_connection() or die "DB connection error, exiting.\n";
 if($ARGV[0]){
     @nodes = @ARGV;
 }else{
-    my $nodes_tmp = OAR::Nodes::get_all_hosts();
+	my $nodes_tmp = OAR::Nodes::get_all_hosts();
 	@nodes = @$nodes_tmp;
 }
 # SQL where handling, add resources that match sql clause to @resources
@@ -271,7 +301,10 @@ elsif ($listall){
 elsif ($#resources >= 0 || defined($sql_property)){ # -r or --sql where called
 	print_resources_infos(\@resources);
 }
-elsif ($#nodes >= 0){ # a hostname was given or not (in this case all hostnames)
+elsif (not $ARGV[0]){ # a hostname was not given (in this case all hostnames)
+	print_all_hosts_infos();
+}
+elsif ($#nodes >= 0){ # a hostname was given 
 	print_hosts_infos(\@nodes);
 }
 else{

@@ -215,4 +215,11 @@ sub add_running_jobs_to_resource_properties($){
 	}
 }
 
+sub get_all_resources_jobs() {
+	my $res;
+
+	$res = OAR::IO::get_resources_jobs($base);
+
+	return $res;
+}
 1;
